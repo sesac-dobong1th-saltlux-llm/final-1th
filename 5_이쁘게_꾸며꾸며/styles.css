@@ -1,0 +1,157 @@
+body {
+    font-family: 'Noto Sans', sans-serif;
+    background-color: #f7fafc;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0 30px;
+}
+
+.logo, .menu-item {
+    font-weight: 800;
+    color: #4a5568;
+    text-decoration: none;
+}
+
+.menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.menu-item:hover {
+    color: #2d3748;
+}
+
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+    margin: 0 30px;
+}
+
+.sidebar, .content {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 600px;  /* 최소 높이 설정 */
+}
+
+/*
+.sidebar {
+    flex-basis: 25%;
+}*/
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 600px;  /* 최소 높이 설정 */
+    flex-basis: 25%;
+}
+.content {
+    flex-basis: 70%;
+}
+
+.button-blue {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    color: #ffffff;
+    background-color: #4299e1;
+    border: none;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.button-text {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    color: #4a5568;
+    background-color: #f7fafc;
+    border: none;
+    border-radius: 0.25rem;
+    text-align: left;
+}
+
+.button-text:hover {
+    background-color: #e2e8f0;
+}
+/*
+.user-card {
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    background-color: #ebf8ff;
+    border-radius: 0.25rem;
+}
+*/
+
+.user-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: #ebf8ff;
+    border-radius: 0.25rem;
+    margin-top: auto;  /* 하단으로부터 일정 여백 유지 */
+    margin-bottom: 2rem;  /* 하단 여백 추가 */
+}
+.user-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.user-info {
+    font-size: 0.875rem;
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-role {
+    color: #718096;
+}
+
+.input-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 0.25rem;
+    resize: none;
+    height: 300px;  /* textarea 높이 조정 */
+}
+
+.file-upload {
+    margin-top: 1rem;
+}
+
+.input-file {
+    width: 100%;
+    padding: 0.5rem;
+    color: #4299e1;
+    background-color: #ebf8ff;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.content-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
