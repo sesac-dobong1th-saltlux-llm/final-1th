@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "express": "^4.19.2",
-    "mysql": "^2.18.1",
-    "serve-static": "^1.15.0"
-  }
-}
