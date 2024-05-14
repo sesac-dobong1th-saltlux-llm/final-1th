@@ -1,7 +1,0 @@
-services:
-  fastapi:
-    build:
-      context: .
-      dockerfile : .
-    ports:
-      - 8080:8000
