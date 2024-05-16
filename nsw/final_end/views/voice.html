@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>음성 인식 테스트</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <button id="startBtn">녹음 시작</button>
+    <button id="stopBtn">녹음 중지</button>
+    <textarea id="resultArea"></textarea>
+    <div id="timer">90</div> <!-- 타이머 표시 영역 -->
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    let countdownInterval; // 타이머를 위한 변수
+
+    $('#startBtn').on('click', async function() {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        mediaRecorder.start();
+
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+        };
+
+        // 타이머 시작
+        let countdown = 90; // 90초부터 시작
+        $('#timer').text(countdown); // 초기 값 설정
+        countdownInterval = setInterval(function() {
+            countdown--;
+            $('#timer').text(countdown); // 타이머 업데이트
+            if (countdown <= 0) {
+                clearInterval(countdownInterval); // 타이머 종료
+                mediaRecorder.stop(); // 녹음 자동 중지
+                $('#stopBtn').trigger('click'); // 녹음 중지 버튼 프로그래매틱하게 클릭
+            }
+        }, 1000); // 매 초마다 감소
+    });
+
+    $('#stopBtn').on('click', function() {
+        clearInterval(countdownInterval); // 타이머 중지
+        mediaRecorder.stop();
+        mediaRecorder.onstop = async function() {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob);
+
+            try {
+                const response = await fetch('/audio', {
+                    method: 'POST',
+                    body: formData
+                });
+                const resultText = await response.text(); // 서버로부터 음성 인식 결과를 텍스트로 받음
+                $('#resultArea').val(resultText); // 결과를 textarea에 표시
+                console.log(resultText);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            audioChunks = [];
+        };
+    });
+</script>
+
+</body>
+</html>

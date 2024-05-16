@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>꼬질봇-질문을 선택해주세요</title>
+    <link rel="stylesheet" href="/css/tail_questions.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+
+            <a href="#" class="logo">
+                <img src="/images/goliebot.png" alt=""> 꼬질봇
+                <small>똑똑한 꼬리 질문 봇</small>
+            </a>
+            <div class="menu">
+                <a href="#" class="menu-item">서비스 소개</a>
+                <a href="#" class="menu-item">가이드</a>
+            </div>
+            <a href="#" onclick="event.preventDefault(); logoutUser();" class="menu-item">LOGOUT</a>
+
+        </nav>
+    </header>
+    <aside>
+        <div class="sideChat">
+            <ul class="sideChat-ul">
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/choice'"> +
+                    새로운 면접</li>
+
+                <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
+                    <!-- <small>4월3일</small>
+                    <li class="sideChat-child">A 회사 지원 동기 및 입사 후 포부</li> -->
+
+                </div>
+
+
+
+            </ul>
+
+            <div class="sideChat-proflie">
+                <img src="/images/usericon.png" alt="유저아이콘">
+                <p>Mr.Kim</p>
+                <img src="/images/gearicon.png" alt="환경설정 창">
+            </div>
+        </div>
+    </aside>
+    <main>
+        <!-- Questions will be dynamically inserted here -->
+        <ul id="questionList"></ul>
+
+    </main>
+    <script>
+        function logoutUser() {
+            $.ajax({
+                type: 'POST',
+                url: '/logout',
+                success: function (response) {
+                    alert('로그아웃 되었습니다!')
+                    window.location.href = '/';
+                },
+                error: function () {
+                    alert('로그아웃 실패');
+                }
+            });
+        }
+        $(document).ready(function () {
+
+            // 로그아웃 설정
+
+            const chatListId = window.location.pathname.split('/')[2]
+            // 채팅방 목록을 불러오는 AJAX 요청
+            function loadChatList() {
+                $.ajax({
+                    url: '/api/myChatList',
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.success && response.chatList) {
+                            // 날짜별로 그룹화
+                            // arr.reduce() 인수로 함수를 받고 (누적계산값, 현재값) => return 계산값
+                            const groupedByDate = response.chatList.reduce((acc, chat) => {
+                                const date = new Date(chat.chat_created_at);
+                                const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                                if (!acc[dateString]) {
+                                    acc[dateString] = [];
+                                }
+                                acc[dateString].push(chat);  // 여기서는 chat 객체 전체를 배열에 추가
+                                return acc;
+                            }, {});
+
+                            // HTML 문자열 구성
+                            let chatListHtml = '';
+                            for (const [date, chats] of Object.entries(groupedByDate)) {
+                                chatListHtml += `<small>${date}</small>`;
+                                chats.forEach(chat => {
+                                    // 여기서 chat.chat_list_id를 활용하여 클릭 이벤트에 사용
+                                    chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/user/${chat.user_login_id}/${chat.chat_id}'">${chat.chat_summary}</li>`;
+                                });
+                            }
+
+                            $('#introductionContainer').html(chatListHtml);
+                        } else {
+                            $('#introductionContainer').html('<p>No chats available.</p>');
+                        }
+                    },
+                    error: function (error) {
+                        $('#introductionContainer').html('<p>Error loading chats.</p>');
+                    }
+                });
+            }
+
+
+            function loadQuestions(chatId,userId) {
+                $.ajax({
+                    url: `/get_question/${chatId}`,
+                    type: 'GET',
+                    success: function (data) {
+                      
+                        if (data.success && data.questions) {
+                            const questionsHtml = data.questions.slice(0, 3).map((q, index) =>
+                                `<div class="main-cardBox" onclick="window.location.href='/user/tail_chat/${userId}/${q.iq_id}'">
+                                <p>${q.iq_text}</p>
+                                
+                            </div>`
+                            ).join('');
+                            $('main').html(questionsHtml);
+                        } else {
+                            $('main').html('<p>No questions available.</p>');
+                        }
+                    },
+                    error: function () {
+                        $('main').html('<p>Error loading questions.</p>');
+                    }
+                });
+            }
+
+
+         
+
+
+
+            // 함수 호출
+
+            loadChatList();
+            loadQuestions();
+            
+            // 현재 페이지의 URL을 가져옵니다.
+            const currentUrl = window.location.pathname;
+            // URL을 '/' 기준으로 분할합니다.
+            const segments = currentUrl.split('/');
+            // 마지막 세그먼트를 가져옵니다. 이 경우 URL의 마지막 부분입니다.
+            const chatId = segments[segments.length - 1];
+            const userId=segments[2]
+            console.log('chatId: ' + chatId);
+            loadQuestions(chatId,userId);
+
+        });
+
+    </script>
+
+
+
+
+</body>
+
+</html>

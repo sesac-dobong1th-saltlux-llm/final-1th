@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/index.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>회원가입/로그인 페이지</title>
+</head>
+
+<body>
+
+  <div id="container" class="container">
+    <!-- FORM SECTION -->
+    <div class="row">
+      <!-- SIGN UP -->
+      <div class="col align-items-center flex-col sign-up">
+        <div class="form-wrapper align-items-center">
+          <div class="form sign-up">
+            <div class="input-group">
+              <div style="display: flex;">
+                <i class='bx bxs-user'></i>
+                <input type="text" placeholder="아이디" name="uid" id="uid" style="margin-right: 9px;width: 90%;">
+                <button style="width: 40%;" id="checkuid">ID 중복검사</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <i class='bx bxs-user'></i>
+              <input type="text" placeholder="이름" name="uname" id="uname">
+            </div>
+            <div class="input-group">
+              <div style="display: flex;">
+                <i class='bx bx-mail-send'></i>
+                <input type="email" placeholder="이메일" name="uemail" id="uemail" style="margin-right: 9px;width: 90%;">
+                <button style="width: 40%;" id="sendemail">인증번호</button>
+              </div>
+
+            </div>
+            <div style="display: none;" id="zzmessage">
+              <b>60</b>초 이후에 인증번호 발송이 다시 활성화 됩니다
+            </div>
+            <div class="input-group" style="display: none;" id="emailbox">
+              <div style="display: flex;">
+                <i class='bx bxs-user'></i>
+                <input type="text" placeholder="이메일 인증번호 확인" name="emailcheck" id="emailcheck"
+                  style="margin-right: 9px;width: 90%;">
+                <button style="width: 40%;" id="approveEmail">인증확인</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <i class='bx bxs-lock-alt'></i>
+              <input type="password" placeholder="비밀번호" name="upass" id="upass">
+            </div>
+            <div class="input-group">
+              <i class='bx bxs-lock-alt'></i>
+              <input type="password" placeholder="암호 확인" name="upassconfirm" id="upassconfirm">
+            </div>
+            <button id="signupButton">
+              회원가입
+            </button>
+            <p>
+              <span>
+                이미 계정이 있으신가요?
+              </span>
+              <b onclick="toggle()" class="pointer">
+                로그인
+              </b>
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <!-- END SIGN UP -->
+      <!-- SIGN IN -->
+      <div class="col align-items-center flex-col sign-in">
+        <div class="form-wrapper align-items-center">
+          <div class="form sign-in">
+            <div class="input-group">
+              <i class='bx bxs-user'></i>
+              <input type="text" placeholder="아이디" id="login_uid" name="login_uid">
+            </div>
+            <div class="input-group">
+              <i class='bx bxs-lock-alt'></i>
+              <input type="password" placeholder="비밀번호" id="login_upass" name="login_upass">
+            </div>
+            <button id="loginButton">로그인</button>
+
+            <p>
+              <b class="pointer" onclick="window.location.href='/find_password'">
+                비밀번호를 잊으셧나요?
+              </b>
+            </p>
+            <p>
+              <span>
+                계정이 없으신가요?
+              </span>
+              <b onclick="toggle()" class="pointer">
+                회원가입
+              </b>
+            </p>
+          </div>
+        </div>
+        <div class="form-wrapper">
+
+        </div>
+      </div>
+      <!-- END SIGN IN -->
+    </div>
+    <!-- END FORM SECTION -->
+    <!-- CONTENT SECTION -->
+    <div class="row content-row">
+      <!-- SIGN IN CONTENT -->
+      <div class="col align-items-center flex-col">
+        <div class="text sign-in">
+          <h2>
+            환영합니다!
+          </h2>
+
+        </div>
+        <div class="img sign-in">
+
+        </div>
+      </div>
+      <!-- END SIGN IN CONTENT -->
+      <!-- SIGN UP CONTENT -->
+      <div class="col align-items-center flex-col">
+        <div class="img sign-up">
+
+        </div>
+        <div class="text sign-up">
+          <h2>
+            여러분을 환영합니다!
+          </h2>
+
+        </div>
+      </div>
+      <!-- END SIGN UP CONTENT -->
+    </div>
+    <!-- END CONTENT SECTION -->
+  </div>
+  <script src="/js/join.js"></script>
+  <script>
+    $(document).ready(function () {
+      var countdown;
+      var count = 60;
+
+      const uidRegex = /^[a-zA-Z0-9]{6,15}$/; // 사용자 ID: 영숫자만 허용, 6-15자
+      const upassRegex = /^(?=.*[A-Z])(?=.*[!@#$&*])[a-zA-Z0-9!@#$&*]{8,16}$/; // 비밀번호: 적어도 하나의 대문자와 특수 문자를 포함해야 함, 8-16자
+      const unameRegex = /^\S+$/; // 이름: 공백 없음
+
+      function startCountdown() {
+        clearInterval(countdown);
+        count = 60;
+        $("#zzmessage").show().text(count + "초 후에 인증번호 발송이 다시 활성화됩니다.");
+        countdown = setInterval(function () {
+          count--;
+          if (count >= 0) {
+            $("#zzmessage").text(count + "초 후에 인증번호 발송이 다시 활성화됩니다.");
+          } else {
+            clearInterval(countdown);
+            $("#zzmessage").hide().text("");
+          }
+        }, 1000);
+      }
+
+      $('#checkuid').click(function () {
+        var uid = $('#uid').val();
+        if (!uidRegex.test(uid)) {
+          alert("잘못된 사용자 이름입니다. 영숫자 6-15자로 구성되어야 하며 공백이 없어야 합니다.");
+          return; // 검증 실패시 함수 중지
+        }
+        $.ajax({
+          type: 'POST',
+          url: '/process/checkuid',
+          data: { uid: uid },
+          success: function (response) {
+            alert(response.message);
+            if (response.success) {
+              $("#uid").prop("readOnly", true);
+            }
+          }
+        });
+      });
+
+      $('#sendemail').click(function () {
+        const email = $('#uemail').val();
+        if (!countdown || count <= 0) {
+          $.ajax({
+            type: 'POST',
+            url: '/process/approve',
+            data: { email: email },
+            success: function (response) {
+              alert(response.message);
+              if (response.success) {
+                startCountdown();
+                $("#emailbox").show();
+
+                // 여기서 버튼 클릭 이벤트를 설정하지 말고
+                // 대신 변수에 저장하여 다른 이벤트에서 참조
+                const savedVerificationCode = String(response.verificationCode).trim();
+
+                // 이제 '#approveEmail' 클릭 핸들러를 여기서 정의하지 말고
+                // 전역 또는 다른 적절한 범위에서 설정
+                $('#approveEmail').off('click').on('click', function () {
+                  const verificationCode = $('#emailcheck').val().trim();
+                  console.log(savedVerificationCode + " 서버에서 받은 값");
+                  console.log(verificationCode + " 사용자 입력 값");
+
+                  if (savedVerificationCode === verificationCode) {
+                    alert('인증 성공!');
+                    $("#uemail, #emailcheck, #approveEmail").prop("disabled", true);
+                    clearInterval(countdown);
+                    $("#zzmessage").hide().text("");
+                    $("emailbox").hide()
+                  } else {
+                    alert('인증 번호가 일치하지 않습니다.');
+                  }
+                });
+              }
+            },
+            error: function (error) {
+              console.error('인증 에러', error);
+              alert('인증 중 문제가 발생했습니다.');
+            }
+          });
+        } else {
+          alert("잠시 후 다시 시도해주세요.");
+        }
+      });
+
+
+
+
+      $('#signupButton').click(function () {
+        if ($('#uid').prop("readOnly") && $('#uemail').prop("disabled")) {
+          var data = {
+            uid: $('#uid').val(),
+            uname: $('#uname').val(),
+            uemail: $('#uemail').val(),
+            upass: $('#upass').val(),
+            upassConfirm: $('#upassconfirm').val()
+          };
+
+          // 이름이 null이거나 빈 문자열이 아닌지 확인하고, 공백을 포함하지 않는지 검사
+          if (!data.uname || data.uname.trim() === "" || !unameRegex.test(data.uname)) {
+            alert("유효하지 않은 이름입니다. 이름은 공백을 포함할 수 없으며 비어 있을 수 없습니다.");
+            return;
+          }
+          if (!upassRegex.test(data.upass)) {
+            alert('비밀번호가 잘못되었습니다. 8-16자, 최소 한 개의 대문자와 특수 문자를 포함해야 합니다.');
+            return;
+          }
+
+          if (data.upass !== data.upassConfirm) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+          }
+
+
+
+          $.ajax({
+            type: 'POST',
+            url: '/process/adduser',
+            data: data,
+            success: function (response) {
+              alert(response.message);
+              if (response.success) {
+                window.location.href = response.redirectTo;
+              }
+            },
+            error: function (error) {
+              console.error('회원가입 에러', error);
+              alert('회원가입 실패!');
+            }
+          });
+        } else {
+          alert('ID와 이메일 인증을 완료해주세요.');
+        }
+      });
+
+      // 로그인 로직을 처리하는 함수
+      function handleLogin() {
+        var data = {
+          uid: $('#login_uid').val(),
+          upass: $('#login_upass').val()
+        };
+
+        $.ajax({
+          type: 'POST',
+          url: '/process/login',
+          data: data,
+          success: function (response) {
+            alert(response.message);
+            if (response.success) {
+              window.location.href = response.redirectTo;
+            }
+          },
+          error: function (error) {
+            console.error('로그인 에러', error);
+            alert('아이디 혹은 비밀번호를 잘못 입력하셨습니다.');
+          }
+        });
+      }
+
+      // 로그인 버튼 클릭 이벤트
+      $('#loginButton').click(function () {
+        handleLogin();
+      });
+
+      // 비밀번호 입력 필드에서 엔터 키 이벤트 처리
+      $('#login_upass').keypress(function (event) {
+        if (event.which == 13) {  // 엔터 키 코드는 13입니다.
+          handleLogin();
+        }
+      });
+
+
+    });
+  </script>
+
+
+
+</body>
+
+</html>

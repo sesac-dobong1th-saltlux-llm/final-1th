@@ -1,0 +1,6 @@
+{
+    "host": "llmdatabase-1.cfmq6wqw0199.ap-northeast-2.rds.amazonaws.com",
+    "user" : "admin",
+    "password" : "12345678",
+    "database" : "llmdatabase"
+}

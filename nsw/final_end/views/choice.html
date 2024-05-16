@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>꼬질봇 - 문항을 선택해주세요</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/choice.css">
+</head>
+
+<body>
+
+    <section id="signinup-box" class="signinup-box">
+        <section id="login_container" class="login_container">
+
+            <div class="" style="display: flex;justify-content: space-around;margin: 20px 0 75px;font-size: 1.5rem;">
+                <div class="card">ARD<br>디자인</div>
+                <div class="card">BM<br>경영사무</div>
+                <div class="card">ICT<br>정보통신</div>
+                <div class="card">MM<br>생산관리</div>
+            </div>
+            <div class="" style="display: flex;justify-content: space-around;font-size: 1.5rem;">
+                <div class="card">PS<br>공공서비스</div>
+                <div class="card">RND<br>연구개발</div>
+                <div class="card">SM<br>영업마케팅</div>
+            </div>
+        </section>
+        <section class="login_signin_container">
+            <h1>반갑습니다!</h1>
+            <p>관심 있는 직무를 선택하시고<br>선택 버튼을 눌러주세요</p>
+            <button type="button" id="signinup_button" class="signinup_button">선택</button>
+        </section>
+    </section>
+
+    <section id="signinup-box2" class="signinup-box2">
+        <section class="login_signup_container">
+            <h1>어서오세요!</h1>
+            <p>면접 유형을 선택하시고<br>확인 버튼을 눌러주세요.</p>
+            <button id="signinup_button2" class="signinup_button">이전</button>
+            <button id="test_submit" class="signinup_button">확인</button>
+        </section>
+        <div id="signup_data">
+
+            <div class="button2">직무면접</div>
+            <div class="button2">인성면접</div>
+
+            <div class="buttonCareer">신입</div>
+            <div class="buttonCareer">경력</div>
+        </div>
+
+
+        <script>
+            $(document).ready(function () {
+                $('#signinup_button').click(function () {
+                    $('#signinup-box2').css({
+                        'z-index': '20',
+                        'opacity': '1',
+                        'left': '50%',
+                        'transition': '1.5s ease-in-out'
+                    });
+
+                    $('#signinup-box').css({
+                        'opacity': '0',
+                        'left': '-20%',
+                        'transition': '1.5s ease-in-out'
+                    });
+                });
+
+                $('#signinup_button2').click(function () {
+                    $('#signinup-box2').css({
+                        'z-index': '2',
+                        'opacity': '0',
+                        'left': '120%',
+                        'transition': '1.2s ease-in-out'
+                    });
+
+                    $('#signinup-box').css({
+                        'opacity': '1',
+                        'left': '50%',
+                        'transition': '1.2s ease-in-out'
+                    });
+                });
+
+                $('.card, .button2, .buttonCareer').click(function () {
+                    // 클릭된 요소의 클래스 토글
+                    if ($(this).hasClass('card')) {
+                        $('.card').removeClass('cardOn');
+                        $(this).addClass('cardOn');
+                    } else if ($(this).hasClass('button2')) {
+                        $('.button2').removeClass('button2On');
+                        $(this).addClass('button2On');
+                    } else {
+                        $('.buttonCareer').removeClass('buttonOnCareer');
+                        $(this).addClass('buttonOnCareer');
+                    }
+                });
+
+                $('#test_submit').click(function () {
+                    if ($('.cardOn').length === 1 && $('.button2On').length === 1 && $('.buttonOnCareer').length === 1) {
+                        var data = {
+                            card: $('.cardOn').text().trim(),
+                            interviewType: $('.button2On').text().trim(),
+                            careerType: $('.buttonOnCareer').text().trim()
+                        };
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/submit_choices",
+                            data: JSON.stringify(data),
+                            contentType: "application/json; charset=utf-8",
+                            success: function (response) {
+                                window.location.href = "/one_magnetic";
+                            },
+                            error: function (xhr) {
+                                console.log('오류 상태: ', xhr.status);
+                                console.log('오류 메시지: ', xhr.statusText);
+                                console.log('서버 응답: ', xhr.responseText);
+                                alert('오류가 발생했습니다. 다시 시도해주세요.');
+                            }
+                        });
+                    } else {
+                        alert('모든 카테고리에서 하나씩 선택해야 합니다.');
+                    }
+                });
+
+
+            })
+        </script>
+</body>
+
+</html>

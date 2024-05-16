@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>꼬질봇 - 꼬리질문</title>
+    <link rel="stylesheet" href="/css/new_tail_questions.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        #counBtn {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 48
+        }
+
+        
+.loader {
+    display: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  left: -45%;
+  gap: 8px;
+}
+
+.bar {
+  width: 15px;
+  height: 35px;
+  background-color: #3bcbdb;
+  animation: loading 0.8s infinite ease-in-out;
+}
+
+.bar-1 {
+  animation-delay: 0.15s;
+}
+.bar-2 {
+  animation-delay: 0.3s;
+}
+.bar-3 {
+  animation-delay: 0.45s;
+}
+
+@keyframes loading {
+  0%,
+  80%,
+  100% {
+    height: 32px;
+  }
+  40% {
+    height: 52px;
+  }
+}
+
+
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="chat-container"></div>
+    <div class="typing-container">
+        <div class="typing-content">
+            <div class="typing-textarea">
+                <textarea id="chatInput" spellcheck="false" placeholder="답변을 입력해주세요😁" minlength="200" maxlength="500"></textarea>
+                <span id="sendBtn" class="material-symbols-rounded">send</span>
+                <div class="loader">
+                    <div class="bar bar-1"></div>
+                    <div class="bar bar-2"></div>
+                    <div class="bar bar-3"></div>
+                </div>
+            </div>
+            <div class="typing-controls">
+                <span id="theme-btn" class="material-symbols-rounded" title="라이트/다크 테마">light_mode</span>
+                <span id="startBtn" class="material-symbols-rounded" style="font-size: 48px;"
+                    title="녹음시작">arrow_right</span>
+                <span id="countBtn" title="남은시간은 보여줍니다.">90</span>
+                <span id="stopBtn" class="material-symbols-rounded" title="녹음 종료">stop_circle</span>
+                <span id="backBtn" class="material-symbols-rounded" title="뒤로 가기">arrow_back</span>
+
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                // 변수 선언 및 초기화
+                var chatInput = $("#chatInput");
+                var sendButton = $("#sendBtn");
+                var chatContainer = $(".chat-container");
+                var themeButton = $("#theme-btn");
+                var backBtn = $("#backBtn");
+                var initialInputHeight = chatInput.prop('scrollHeight');
+
+
+                let mediaRecorder;
+        let audioChunks = [];
+        let recordingTime = 90;
+        let countdownInterval;
+
+        $('#startBtn').on('click', async function () {
+            $('.loader').show(); // 로더 보이기
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+                mediaRecorder.onstop = async function () {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob);
+
+                    try {
+                        const response = await fetch('/audio', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const resultText = await response.text();
+                        $('#chatInput').val(resultText);
+                        console.log(resultText);
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                    audioChunks = [];
+                    $('.loader').hide(); // 로더 숨기기
+                };
+
+                mediaRecorder.start();
+                $('#countBtn').css('color', 'red');
+                countdownInterval = setInterval(() => {
+                    recordingTime--;
+                    $('#countBtn').text(recordingTime);
+                    if (recordingTime === 0) {
+                        clearInterval(countdownInterval);
+                        mediaRecorder.stop();
+                        $('#countBtn').css('color', '');
+                        $('#countBtn').text('90');
+                        recordingTime = 90;
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Error accessing media devices.', error);
+            }
+        });
+
+        $('#stopBtn').on('click', function () {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            clearInterval(countdownInterval);
+            $('#countBtn').css('color', '');
+            $('#countBtn').text('90');
+            recordingTime = 90;
+        });
+
+
+                // 초기 데이터 로드 함수
+                var loadDataFromLocalstorage = function () {
+                    // 현재 URL에서 마지막 세그먼트(ID) 추출
+                    const currentUrl = window.location.pathname;
+                    const segments = currentUrl.split('/');
+                    const iq_id = segments[segments.length - 1];
+
+                    // AJAX 요청을 통해 초기 질문 데이터 가져오기
+                    $.ajax({
+                        url: `/get_tail_questions/${iq_id}`,
+                        type: 'GET',
+                        success: function (data) {
+                            // 기본 텍스트 설정 및 테마 적용
+                            var defaultText = `<div class="chat incoming">
+                <div class="chat-content">
+                    <div class="chat-details">
+                        <img src="/images/goliebot.png" alt="chatbot-img">
+                        <p>${data.questions[0].iq_text}</p>
+                    </div>
+                </div>
+            </div>`;
+                            var themeColor = localStorage.getItem("themeColor");
+                            themeColor === "light_mode" ? $('body').addClass("light-mode") : $('body').removeClass("light-mode");
+                            themeButton.text(themeColor === "light_mode" ? "dark_mode" : "light_mode");
+
+                            // 채팅 컨테이너에 새로운 질문을 최상단에 추가
+                            chatContainer.prepend(defaultText);
+                            chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+                        }
+                    });
+                };
+
+                var showIfQuestions = function () {
+                    const currentUrl = window.location.pathname;
+                    const segments = currentUrl.split('/');
+                    const iq_id = segments[segments.length - 1];
+                    // AJAX 요청을 통해 초기 질문 데이터 가져오기
+                    $.ajax({
+                        url: `/show_if_question/${iq_id}`,
+                        type: 'GET',
+                        success: function (data) {
+                            if (data.questions && data.questions.length > 0) {
+                                var allChatsHtml = data.questions.reduce((html, question) => {
+                                    return html + `
+
+<div class="chat outgoing">
+    <div class="chat-content">
+        <div class="chat-details">
+            <img src="/images/usericon.png" alt="user-img">
+            <p>${question.eq_answer}</p>
+        </div>
+    </div>
+</div>
+<div class="chat incoming">
+    <div class="chat-content">
+        <div class="chat-details">
+            <img src="/images/goliebot.png" alt="chatbot-img">
+            <p>${question.eq_text}</p>
+        </div>
+    </div>
+</div>
+`;
+                                }, '');
+
+                                // 기존 채팅에 새로운 채팅 추가
+                                var existingChats = localStorage.getItem("all-chats");
+                                if (existingChats) {
+                                    chatContainer.prepend(allChatsHtml); // 수정: 최상단에 추가
+                                } else {
+                                    chatContainer.html(allChatsHtml); // 새로운 채팅으로 초기화
+                                }
+                                chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+                            }
+                        }
+
+                    });
+
+                }
+
+                // 채팅 요소 생성 함수
+                var createChatElement = function (content, className) {
+                    return $('<div class="chat ' + className + '">' + content + '</div>');
+                };
+
+                // 서버로부터 채팅 응답 받기 함수
+                var getChatResponse = function (incomingChatDiv, userText) {
+                    // URL 구성 및 인코딩
+                    const currentUrl = window.location.pathname;
+                    const segments = currentUrl.split('/');
+                    const iq_id = segments[segments.length - 1];
+                    var API_URL = `/send_tail_questions/${iq_id}?chatInput=${encodeURIComponent(userText)}`;
+
+                    // GET 요청으로 서버에 데이터 요청
+                    fetch(API_URL, { method: 'GET' })
+                        .then(response => response.json())
+                        .then(data => {
+                            // 응답 처리 및 채팅 창 업데이트
+                            var pElement = $('<p></p>').text(data.result);
+                            incomingChatDiv.find(".typing-animation").remove();
+                            incomingChatDiv.find(".chat-details").append(pElement);
+                            chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+                        })
+                        .catch(error => {
+                            // 오류 처리
+                            var pElement = $('<p></p>').addClass("error").text("Oops! Something went wrong while retrieving the response. Please try again.");
+                            incomingChatDiv.find(".typing-animation").remove();
+                            incomingChatDiv.find(".chat-details").append(pElement);
+                        });
+                };
+
+                // 타이핑 애니메이션 표시 함수
+                var showTypingAnimation = function (userText) {
+                    // 애니메이션 HTML 구성
+                    var html = `<div class="chat-content">
+                        <div class="chat-details">
+                            <img src="/images/goliebot.png" alt="chatbot-img">
+                            <div class="typing-animation">
+                                <div class="typing-dot" style="--delay: 0.2s"></div>
+                                <div class="typing-dot" style="--delay: 0.3s"></div>
+                                <div class="typing-dot" style="--delay: 0.4s"></div>
+                            </div>
+                        </div>
+                        <span onclick="copyResponse(this)" class="material-symbols-rounded">content_copy</span>
+                    </div>`;
+                    var incomingChatDiv = createChatElement(html, "incoming");
+                    chatContainer.append(incomingChatDiv);
+                    chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+                    getChatResponse(incomingChatDiv, userText);
+                };
+
+                // 사용자 발신 채팅 처리 함수
+                var handleOutgoingChat = function () {
+                    var userText = chatInput.val().trim();
+                    if (!userText) return;
+                    chatInput.val('');
+                    chatInput.css('height', initialInputHeight + 'px');
+                    var html = `<div class="chat-content">
+                        <div class="chat-details">
+                            <img src="/images/usericon.png" alt="user-img">
+                            <p>${userText}</p>
+                        </div>
+                    </div>`;
+                    var outgoingChatDiv = createChatElement(html, "outgoing");
+                    chatContainer.find(".default-text").remove();
+                    chatContainer.append(outgoingChatDiv);
+                    chatContainer.scrollTop(chatContainer.prop("scrollHeight"));
+                    setTimeout(function () { showTypingAnimation(userText); }, 500);
+                };
+
+                // 삭제 버튼 이벤트 핸들러
+                backBtn.on("click", function () {
+                    if (confirm("이전 대화방으로 돌아가시겠습니까?")) {
+                        history.go(-1);
+                    }
+                });
+
+                // 테마 버튼 토글 이벤트 핸들러
+                themeButton.on("click", function () {
+                    $('body').toggleClass("light-mode");
+                    localStorage.setItem("themeColor", themeButton.text());
+                    themeButton.text($('body').hasClass("light-mode") ? "dark_mode" : "light_mode");
+                });
+
+                // 입력 필드 동적 크기 조정
+                chatInput.on("input", function () {
+                    chatInput.css('height', initialInputHeight + 'px');
+                    chatInput.css('height', chatInput.prop('scrollHeight') + 'px');
+                });
+
+                // 엔터 키 이벤트 처리
+                chatInput.on("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey && $(window).width() > 800) {
+                        e.preventDefault();
+                        handleOutgoingChat();
+                    }
+                });
+
+                // 초기 데이터 로드
+                showIfQuestions();
+                loadDataFromLocalstorage();
+                // 발신 버튼 클릭 이벤트 연결
+                sendButton.on("click", handleOutgoingChat);
+            });
+        </script>
+
+</body>
+
+</html>

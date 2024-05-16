@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>꼬질봇-페이지</title>
+    <link rel="stylesheet" href="/css/tail_questions.css">
+    <link rel="stylesheet" href="/css/one_magnetic.css">
+    <link rel="stylesheet" href="/css/staychatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* .loading__container {
+           
+            display: flex;
+            align-items: center;
+            justify-content: center;
+           
+        }  */
+
+        .loading__container {
+            position: relative;
+            top: -220px;
+            right: -129px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background-color: royalblue;
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: jump 1s infinite;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes jump {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .textarea-container {
+            position: relative;
+            width: 100%;
+        }
+
+
+
+        .char-count {
+    position: relative;
+    right: -85%;
+    color: #888;
+    top: -40px;
+    font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <img src="./images/goliebot.png" alt=""> 꼬질봇
+                <small>똑똑한 꼬리 질문 봇</small>
+            </a>
+            <div class="menu">
+                <a href="/dashBord1" class="menu-item">대시보드</a>
+            </div>
+            <a href="#" onclick="logoutUser()" class="menu-item">LOGOUT</a>
+
+        </nav>
+    </header>
+    <aside>
+        <div class="sideChat">
+            <ul class="sideChat-ul">
+                <li class="sideChat-topChild" style="cursor: pointer;" onclick="window.location.href='/choice'"> +
+                    새로운 면접</li>
+                <div style="position: relative;top:20px;margin-top: 90px;" id="introductionContainer">
+                    <!-- <small>4월3일</small>
+                    <li class="sideChat-child">A 회사 지원 동기 및 입사 후 포부</li> -->
+
+                </div>
+
+            </ul>
+
+            <div class="sideChat-proflie">
+                <img src="./images/usericon.png" alt="유저아이콘">
+                <p>Mr.Kim</p>
+                <img src="./images/gearicon.png" alt="환경설정 창">
+            </div>
+        </div>
+    </aside>
+    <main id="main-first">
+
+
+        <form id="introductionForm" action="/make_question" method="post">
+            <div>
+                <h3>1분 자기소개</h3>
+                <textarea id="introduction" name="introduction" cols="" rows="" class="main-chatTextArea"
+                    placeholder="1분 자기소개를 입력해주세요" minlength="200" maxlength="1000" required></textarea>
+
+            </div>
+            <div class="char-count" id="charCount">0/1000</div>
+            <button type="submit" id="main-chatLast">제출</button>
+        </form>
+
+    </main>
+    <main id="main-two" style="display: none;">
+        <div style="text-align: center;">
+            <img src="./images/goliebot.png" alt="">
+            <img src="./images/messageicon.png" alt="" style="position: relative; width: 200px; top: -100px;">
+            <div class="loading__container">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+
+        <div class="main-chatLast" style="text-align: center;">
+            질문을 생성중입니다.
+
+        </div>
+    </main>
+
+    <script>
+        $(document).ready(function () {
+      
+                $.ajax({
+                    url: '/get-user-info',  // 사용자 정보를 반환하는 서버의 URL
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response)
+                        // 서버로부터 받은 사용자 이름을 p 요소에 설정
+                        $('.sideChat-proflie p').text(response.userName);
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                    }
+                });
+      
+
+
+            const $textarea = $('#introduction');
+            const $charCount = $('#charCount');
+            const TextCount = 1000
+
+            // 글자 수 카운팅을 위한 이벤트 핸들러, 페이지 로드 후 바로 활성화
+            $textarea.on('input', function () {
+                const currentLength = $(this).val().length;
+                $charCount.text(`${currentLength}/${TextCount}`);
+            });
+
+            // 폼 제출 이벤트 핸들러
+            $('#introductionForm').on('submit', function (event) {
+                if (!confirm("제출하시겠습니까?")) {
+                    event.preventDefault(); // 사용자가 '취소'를 선택하면 폼 제출을 막음
+                } else {
+                    $('#main-first').hide();
+                    $('#main-two').show();
+                }
+            });
+        });
+
+
+
+        // 로그아웃 설정
+        function logoutUser() {
+            $.ajax({
+                type: 'POST',
+                url: '/logout',
+                success: function (response) {
+                    alert('로그아웃 되었습니다!')
+                    window.location.href = '/';
+                },
+                error: function () {
+                    alert('로그아웃 실패');
+                }
+            });
+        }
+
+
+
+        $(document).ready(function () {
+            const userId = '<%= userId %>'; // 서버로부터 받은 사용자 ID를 사용
+            $.ajax({
+                url: '/api/myChatList',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success && response.chatList) {
+                        // 날짜별로 그룹화
+                        // arr.reduce() 인수로 함수를 받고 (누적계산값, 현재값) => return 계산값
+                        const groupedByDate = response.chatList.reduce((acc, chat) => {
+                            const date = new Date(chat.chat_created_at);
+                            const dateString = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+                            if (!acc[dateString]) {
+                                acc[dateString] = [];
+                            }
+                            acc[dateString].push(chat);  // 여기서는 chat 객체 전체를 배열에 추가
+                            return acc;
+                        }, {});
+
+                        // HTML 문자열 구성
+                        let chatListHtml = '';
+                        for (const [date, chats] of Object.entries(groupedByDate)) {
+                            chatListHtml += `<small>${date}</small>`;
+                            chats.forEach(chat => {
+                                // 여기서 chat.chat_list_id를 활용하여 클릭 이벤트에 사용
+                                chatListHtml += `<li class='sideChat-child' onclick="window.location.href='/user/${userId}/${chat.chat_id}'">${chat.chat_summary}</li>`;
+                            });
+                        }
+
+                        $('#introductionContainer').html(chatListHtml);
+                    } else {
+                        $('#introductionContainer').html('<p>No chats available.</p>');
+                    }
+                },
+                error: function (error) {
+                    $('#introductionContainer').html('<p>Error loading chats.</p>');
+                }
+            });
+        });
+
+
+
+    </script>
+
+
+</body>
+
+</html>
