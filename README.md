@@ -37,5 +37,8 @@
 
 ## 기술 스택
 
-```markdown
-![이미지 설명](images/기술스택.png)
+
+![기술스택](images/기술스택.png)
+
+## 시연 영상
+https://www.youtube.com/watch?v=APx9j2d2uQY
