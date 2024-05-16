@@ -1,0 +1,26 @@
+.env안에
+MYPASS = ""
+MYEMAIL = ""
+PORT = 80
+형태가 있고 
+MYPASS와 MYEMAIL 안에는 맞춰주셔야함
+https://minu0807.tistory.com/155 에서 본인 gmail아이디와 발급받은 비빈번호를 기입하셔야함.
+
+config/dbconfig.json는 본글에서는 RDS때 발급받은게 기입되어있음
+{
+    "host": "사용하실 호스트명",
+    "user" : "기입하실유저이름",
+    "password" : "유저비번",
+    "database" : "스키마이름"
+}
+
+본인컴이라면
+{
+    "host": "로컬호스트 or 127.0.0.1",
+    "user" : "root(mysql접속계정 보통안바꾸셧으면 root)",
+    "password" : "본인의비번",
+    "database" : "본인의 스키마이름"
+}
+
+
+
