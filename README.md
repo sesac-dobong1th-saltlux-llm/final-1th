@@ -36,8 +36,8 @@
 4. 해당 데이터를 DB로 저장하여 이후 고객이 접속해도 기존 대질문셋이 남아 있어 그 당시 어떤 답변을 했는지 이후에도 스스로 피드백할 수 있도록 유도합니다.
 
 ## 기술 스택
+![기술스택](https://github.com/sesac-dobong1th-saltlux-llm/final-project-1th/assets/91187038/41679ef0-f9e4-4823-ac0a-b0ac3ff4d215)
 
-![기술스택](https://github.com/sesac-dobong1th-saltlux-llm/final-project-1th/assets/91187038/df12b36b-b055-41ad-abbe-f0e96694c731)
 
 ## 시연 영상
 https://www.youtube.com/watch?v=APx9j2d2uQY
