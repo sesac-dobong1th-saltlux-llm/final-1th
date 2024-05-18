@@ -37,8 +37,7 @@
 
 ## 기술 스택
 
-
-![기술스택](images/기술스택.png)
+![기술스택](https://github.com/sesac-dobong1th-saltlux-llm/final-project-1th/assets/91187038/df12b36b-b055-41ad-abbe-f0e96694c731)
 
 ## 시연 영상
 https://www.youtube.com/watch?v=APx9j2d2uQY
